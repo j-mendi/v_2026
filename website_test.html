@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Valentine's Color Picker 🎡</title>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+    <style>
+        body {
+            background-color: #fff0f3;
+            font-family: 'Segoe UI', Tahoma, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 40px 20px;
+            color: #4a4a4a;
+        }
+
+        .card {
+            background: white;
+            padding: 30px;
+            border-radius: 30px;
+            box-shadow: 0 10px 30px rgba(255, 175, 190, 0.3);
+            text-align: center;
+            max-width: 400px;
+            width: 100%;
+        }
+
+        h1 {
+            color: #ff4d6d;
+            margin-bottom: 10px;
+        }
+
+        .wheel-box {
+            position: relative;
+            width: 300px;
+            height: 300px;
+            margin: 20px auto;
+        }
+
+        canvas {
+            border-radius: 50%;
+            border: 5px solid #fff;
+            box-shadow: 0 0 15px rgba(0, 0, 0, 0.1);
+            transition: transform 4s cubic-bezier(0.15, 0, 0.15, 1);
+        }
+
+        .pointer {
+            position: absolute;
+            top: -15px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 15px solid transparent;
+            border-right: 15px solid transparent;
+            border-top: 25px solid #ff4d6d;
+            z-index: 10;
+        }
+
+        .spin-btn {
+            background: #ff4d6d;
+            color: white;
+            border: none;
+            padding: 15px 40px;
+            font-size: 1.1rem;
+            border-radius: 50px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+            margin-top: 20px;
+        }
+
+        .spin-btn:hover {
+            background: #ff758f;
+            transform: translateY(-2px);
+        }
+
+        .spin-btn:disabled {
+            background: #ffccd5;
+            cursor: not-allowed;
+        }
+
+        #result {
+            margin-top: 20px;
+            font-size: 1.4rem;
+            font-weight: bold;
+            color: #ff4d6d;
+            min-height: 1.6em;
+        }
+
+        .itinerary {
+            margin-top: 30px;
+            text-align: left;
+            border-top: 2px dashed #ffccd5;
+            padding-top: 20px;
+        }
+
+        .itinerary h3 {
+            text-align: center;
+            color: #ff758f;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="card">
+        <h1>plan for the 14th </h1>
+        <p>spin for colour of the day!</p>
+
+        <div class="wheel-box">
+            <div class="pointer"></div>
+            <canvas id="wheel" width="300" height="300"></canvas>
+        </div>
+
+        <button class="spin-btn" id="spinBtn" onclick="spin()">spin me!! </button>
+        <div id="result"></div>
+
+        <div class="itinerary">
+            <h3>itinerary for the day :3</h3>
+            <p> <b>07:40</b> - train @ st pancras station</p>
+            <p> <b>08:34</b> - arrive at location</p>
+            <p> <b>09:00</b> - breakfast @ Kitch or Lazix café</p>
+            <p> <b>10:00</b> - [optional] cafe to go to </p>
+            <p> <b>11:00</b> - house of art & knowledge </p>
+            <p> <b>13:00</b> - explore location </p>
+            <p> <b>14:00</b> - cathedral/other touristy sites? </p>
+            <p> <b>15:00</b> - cafe 2/waterstones </p>
+            <p> <b>17:30</b> - dinner reservation </p>
+            <p> <b>19:00</b> - train back to ldn </p>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('wheel');
+        const ctx = canvas.getContext('2d');
+        const spinBtn = document.getElementById('spinBtn');
+        const resultDiv = document.getElementById('result');
+
+        // YOUR COLORS
+        const sectors = [
+            { color: "#000000", label: "Black", text: "#fff" },
+            { color: "#ffffff", label: "White", text: "#000" },
+            { color: "#795548", label: "Brown", text: "#fff" },
+            { color: "#ffeb3b", label: "Yellow", text: "#000" },
+            { color: "#b9fbc0", label: "Mint Green", text: "#000" },
+            { color: "#d32f2f", label: "Red", text: "#fff" },
+            { color: "#b3e5fc", label: "Light Blue", text: "#000" }
+        ];
+
+        const numSectors = sectors.length;
+        const arc = 2 * Math.PI / numSectors;
+        let ang = 0;
+
+        function drawSector(sector, i) {
+            const angle = i * arc;
+            ctx.save();
+            ctx.beginPath();
+            ctx.fillStyle = sector.color;
+            ctx.moveTo(150, 150);
+            ctx.arc(150, 150, 150, angle, angle + arc);
+            ctx.lineTo(150, 150);
+            ctx.fill();
+
+            // Add Labels
+            ctx.translate(150, 150);
+            ctx.rotate(angle + arc / 2);
+            ctx.textAlign = "right";
+            ctx.fillStyle = sector.text;
+            ctx.font = "bold 16px sans-serif";
+            ctx.fillText(sector.label, 130, 10);
+            ctx.restore();
+        }
+
+        sectors.forEach(drawSector);
+
+        let rotation = 0;
+        function spin() {
+            spinBtn.disabled = true;
+            resultDiv.innerText = "Choosing...";
+
+            const extraSpin = Math.floor(Math.random() * 360) + 1440; // 4 full laps + random
+            rotation += extraSpin;
+            canvas.style.transform = `rotate(${rotation}deg)`;
+
+            setTimeout(() => {
+                spinBtn.disabled = false;
+                const actualDeg = rotation % 360;
+                // Index calculation adjusted for top pointer
+                const winningIndex = Math.floor((360 - (actualDeg % 360) + 270) % 360 / (360 / numSectors));
+                const winner = sectors[winningIndex].label;
+
+                resultDiv.innerText = `throughout the day you will be taking photos of things of this colour with a camera, please wear a colour similar to ${winner}!`;
+
+                // Confetti celebration!
+                confetti({
+                    particleCount: 100,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#ff4d6d', '#ff8fa3', '#ffffff']
+                });
+            }, 4000);
+        }
+    </script>
+</body>
+
+</html>
